@@ -123,13 +123,15 @@ function updateMessage() {
 // ou removidos
 var M = (function() {
 
+	var not_set_value = 0;
+
 	function M() {
 		this._m = [];
 	}
 
-	M.prototype.addPixel = function(x, y) {
+	M.prototype.addPixel = function(x, y, w) {
 	    if(this._m[x] == undefined) this._m[x] = {};
-		this._m[x][y] = 1;
+		this._m[x][y] = w;
 	}
 
 	// M.prototype.remPixel = function(x, y) {
@@ -139,7 +141,7 @@ var M = (function() {
 	M.prototype.getPixel = function(x, y) {
 		if(this._m[x] === undefined 
 			|| this._m[x][y] === undefined) {
-			return 0;
+			return not_set_value;
 		}
 		return this._m[x][y];
 	}
@@ -148,23 +150,25 @@ var M = (function() {
 
 })();
 
-// Matrix 4-d. Verifica conexão em dois pontos
+// Matrix 4-d
 var M4 = (function() {
+
+	var not_set_value = 0;
 
 	function M4() {
 		this._m4 = [];
 	}
 
-	M4.prototype.addPair = function(xa, ya, xb, yb) {
+	M4.prototype.addPair = function(xa, ya, xb, yb, w) {
 	    if(this._m4[xa] == undefined) this._m4[xa] = {};
 	    if(this._m4[xa][ya] == undefined) this._m4[xa][ya] = new M();
-	    this._m4[xa][ya].addPixel(xb, yb);
+	    this._m4[xa][ya].addPixel(xb, yb, w);
 	}
 
 	M4.prototype.getPair = function(xa, ya, xb, yb) {
 		if(this._m4[xa] === undefined 
 			|| this._m4[xa][ya] === undefined) {
-			return 0;
+			return not_set_value;
 		}
 		return this._m4[xa][ya].getPixel(xb, yb);
 	}
@@ -195,7 +199,7 @@ function addRect(x, y, isObj) {
     // TODO: respeitar limites da imagem
     for(i = xi; i < xf; i++) {
         for(j = yi; j < yf; j++) {
-            fnAdd.addPixel(i, j);
+            fnAdd.addPixel(i, j, 1);
         }
     }
 }
@@ -212,7 +216,7 @@ function getColor(x, y, ctx) {
 // Segmentação...
 
 function execCut() {
-
+	
 	//// Geração histogramas...
 	histBack = [];
 	histFore = [];
@@ -262,66 +266,46 @@ function execCut() {
 		return Math.exp( -1 * Math.abs(p-q)/255 );
 	}
 
-	//// Vértices....
+	//// Arestas
+	// Qtd.. width*height*6 - (width+height)
 
-	var V = []; // type: S, T ou p | type p com posições x,y e valor v
-
-	// S - nodo source 
-	V.push({ type: 'S'});
-	// T - nodo sink
-	V.push({ type: 'T'});
-	// 1 nodo para pixel
-	for(i = 0; i < width; i++) {
-		for(j = 0; j < height; j++) {
-			V.push({
-				type: 'p',
-				x: i,
-				y: j,
-				v: getColor(i, j, shadowCtx),			
-			})
-		}
-	}
-	
-	//// Arestas... 
+	// S e T adicionados no final
+	let iS = width + 1;	let jS = height + 1;
+	let iT = width + 2; let jT = height + 2;
 
 	var N = new M4();
-	
-	// pares {p, q} 8-neighborhood
-	// Conexões abaixo e acima, ou seja, entre 
-	// (i,j), (i+1,j) e (i, j), (i, j+1)
-	console.log(width, height)
+	var count = 0;
 	for(i = 0; i < width; i++) {
 		for(j = 0; j < height; j++) {
-			// Última link somente com conexões horizontais
-			if(i < height-1) {
-				N.addPair(i, j, i+1, j);
+
+			//// Pares {p, q} 8-neighborhood
+			
+			// Última linha somente com conexões horizontais
+			if(i < width-1) {
+				N.addPair(i, j, i+1, j, 1);
 				count++;
 			}
 			// Última coluna somente com conexões verticais
-			if(j < width-1) {
-				N.addPair(i, j, i, j+1);			
+			if(j < height-1) {
+				N.addPair(i, j, i, j+1, 1);
+				count++;
 			}
+
+			// Conexões com S
+			N.addPair(iS, jS, i, j, 1);
+			N.addPair(i, j, iS, jS, 1);
+			count+=2;
+
+			// Conexões com T
+			N.addPair(iT, jT, i, j, 1);
+			N.addPair(i, j, iT, jT, 1);
+			count+=2;
+
 		}
 	}
 
-	// Entre pixel e S e entre pixel e S
 
-
-
-
-
-	var Vsize = V.length;
-	// var soma = 0;
-	// for(i = 0; i < Vsize; i++) {
-	// 	for(j = 0; j < Vsize; j++) {
-	// 		if(V[i][j].type == 'p') {
-	// 			soma += V[i][j].v;
-	// 		}
-	// 	}
-	// }
-
-	// console.log(soma);
-	console.log(V);
+	console.log(count, width*height*6-(width+height));
 
 
 }
