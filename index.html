@@ -3,13 +3,38 @@
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="./style.css">
+    <!-- Para plot dos gráficos -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://benpickles.github.io/peity/jquery.peity.min.js"></script>
   </head>
   <body>
-    <div id='message'>Seleção BACKGROUND</div>
+    <div id='message'></div>
     <!-- Para desenho e sejeção de BACKGROUND e FOREGROUND -->
     <canvas id="mainCanvas" width="438" height="300"></canvas>
     <!-- Não altera imagem. Usado para consulta do valor do pixel -->
     <canvas id="shadowCanvas" width="438" height="300"></canvas>
+    
+    <div class="hist">
+      <div class="bar" id='histBack'></div>
+      <br>
+      Background
+    </div>
+    <div class="hist">
+      <div class="bar" id='histFore'></div>
+      <br>
+      Foreground
+    </div>
+
+    <p style="max-width: 400px;background: #fdfdfd;padding: 12px;bottom: 0px;position: absolute;" >
+      <b>
+        Pressione 'b' para background e 'f' para foreground. 
+        Clique e solte para iniciar uma seleção. Clique e solte novamente
+        para finalizar uma seleção.
+      </b>
+    </p>
+
+
   </body>
   <script type="text/javascript" src="./main.js"></script>
+
 </html>
