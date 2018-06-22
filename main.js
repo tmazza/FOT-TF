@@ -215,16 +215,23 @@ function getColor(x, y, ctx) {
 
 // Segmentação...
   // TESTES...
+  // Bpq - boundary penalty
+  function B(vp, vq) {
+    // Penalização linear independente do par de pixel
+    // deveria: penalizar mais por descontinuidade em 
+    // pixel semelhantes (ruído) e penalizar menos por
+    // descontinuidades em pixel diferentes
+    return Math.exp( -1 * Math.abs(vp-vq)/255 );
+  }
+  // R("obj") - penalties para obj
+  function RFore(v) {
+    return 1 - Math.exp( -1 * (histFore[v] / somaFore) );
+  }
 
-  // // R("obj") - penalties para obj
-  // function RFore(v) {
-  //   return 1 - Math.exp( -1 * (histFore[v] / somaFore) );
-  // }
-
-  // // R("bkg") - penalties para "bkg"
-  // function RBack(v) {
-  //   return 1 - Math.exp( -1 * (histBack[v] / somaBack) );
-  // }
+  // R("bkg") - penalties para "bkg"
+  function RBack(v) {
+    return 1 - Math.exp( -1 * (histBack[v] / somaBack) );
+  }
 function execCut() {
     
   //// Geração histogramas...
@@ -284,7 +291,7 @@ function execCut() {
   let iT = width + 2; let jT = height + 2;
 
   let lambda = 1; 
-  let K = 1000; // TODO...
+  let K = 2; // maior B possível é 1
 
   var N = new M4();
   for(i = 0; i < width; i++) {
