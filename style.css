@@ -26,3 +26,10 @@ body {
   line-height: 25px;
   padding: 0px 6px;
 }
+#info-box {
+  position: absolute;
+  bottom: 0px;
+  max-width: 400px;
+  background: #fdfdfd;
+  padding: 12px;
+}
