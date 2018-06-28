@@ -9,11 +9,20 @@
   </head>
   <body>
     <div id='message'></div>
+
+    <input type="range" id="lambda" step="10" min="0" max="1000" value="50">
+    <br>
     <!-- Para desenho e sejeção de BACKGROUND e FOREGROUND -->
-    <canvas id="mainCanvas" width="438" height="300"></canvas>
+    <canvas id="mainCanvas" width="30" height="30"></canvas>
     <!-- Não altera imagem. Usado para consulta do valor do pixel -->
-    <canvas id="shadowCanvas" width="438" height="300"></canvas>
+    <canvas id="shadowCanvas" width="30" height="30"></canvas>
     
+    <!-- <br><hr><br> -->
+
+    <canvas id="resultCanvas" width="30" height="30"></canvas>
+    <!-- <canvas id="backCanvas" width="10" height="10"></canvas> -->
+    <!-- <canvas id="foreCanvas" width="10" height="10"></canvas> -->
+
     <div class="hist">
       <div class="bar" id='histBack'></div>
       <br>
@@ -25,15 +34,16 @@
       Foreground
     </div>
 
-    <p id="info-box">
+<!--     <p id="info-box">
       <b>
         Pressione 'b' para background e 'f' para foreground. 
         Clique e solte para iniciar uma seleção. Clique e solte novamente
         para finalizar uma seleção.
       </b>
     </p>
-
+ -->
   </body>
   <script type="text/javascript" src="./main.js"></script>
+  <script type="text/javascript" src="./graph_cut.js"></script>
 
 </html>

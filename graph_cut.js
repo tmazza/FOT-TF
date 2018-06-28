@@ -1,27 +1,20 @@
-let graph = [[0, 16, 13,  0,  0,  0],
-  [0,  0, 10, 12,  0,  0],
-  [0,  4,  0,  0, 14,  0],
-  [0,  0,  9,  0,  0, 20],
-  [0,  0,  0,  7,  0,  4],
-  [0,  0,  0,  0,  0,  0]];
+function minCut(N, source, sink) {
+  rows = 900 + 2;
+  cols = 900 + 2;
 
-let source = 0; 
-let sink = 5
-minCut(graph, source, sink)
+  console.log('rows: ', rows, 'cols:', cols);
 
-
-function minCut(graph, source, sink) {
-  rows = graph.length;
-  cols = graph[0].length;
-
-  // console.log('rows: ', rows, 'cols:', cols);
-
+  let data = N._m;
   original = [];
+  graph = [];
   for(let i = 0; i < rows; i++) {
-    original[i] = graph[i].slice();
+    original[i] = [];
+    graph[i] = [];
+    for(let j = 0; j < cols; j++) {
+      original[i][j] = data[i] == undefined || data[i][j] == undefined ? 0 : data[i][j];
+      graph[i][j] = data[i] == undefined || data[i][j] == undefined ? 0 : data[i][j];
+    }
   }
-  // console.log('graph', graph);
-  // console.log('original', originall);
 
   let max_flow = 0;
   
@@ -57,38 +50,37 @@ function minCut(graph, source, sink) {
       // incrementa fluxo em uso (aresta para-de <-)
       graph[v][u] += path_flow; 
       v = parent[v];
-    }   
-
-    console.log('parent', parent);
-    console.log('graph', graph);
+    }
 
   }
 
   // aresta que inicialmente tinham peso, mas 
   // agora tem peso zero
+  let cut = [];
   for(let i = 0; i < rows; i++) {
-    for(let j = 0; j < rows; j++) {
+    for(let j = 0; j < cols; j++) {
       if (graph[i][j] == 0 && original[i][j] > 0) {
-        console.log(i + " - " + j);
+        // console.log(i + " - " + j);
+        cut.push([i, j]);
       }
     }
   }
 
-  console.log('nodos conectados a source');
-  for(let j = 0; j < rows; j++) {
-    if (graph[source][j]) {
-      console.log(j);
+  let sourceNodes = [];
+  for(let i = 0; i < rows; i++) {
+    if (graph[source][i] > 0) {
+      sourceNodes.push(i);
     }
   }
 
-  console.log('nodos conectados a source');
-  for(let j = 0; j < rows; j++) {
-    if (graph[sink][j]) {
-      console.log(j);
+  let sinkNodes = [];
+  for(let i = 0; i < rows; i++) {
+    if (graph[i][sink] > 0) {
+      sinkNodes.push(i);
     }
   }
 
-  console.log('final', graph);
+  return [sourceNodes, sinkNodes, cut];
 
   // busca em largura verificando se há caminho entre
   // origem e destino
@@ -114,9 +106,11 @@ function minCut(graph, source, sink) {
       u = queue.shift();
       // adiciona cada nodo adjacente a u, que ainda não
       // tenha sido marcado, a fila.
+      // console.log('graph', graph);
+
       for(let j = 0; j < cols; j++) {
         let arestas = graph[u];
-
+        // console.log('arestas', arestas);
         // não visitado e há conexão
         if(visited[j] == false && arestas[j] > 0) {
           queue.push(j);
