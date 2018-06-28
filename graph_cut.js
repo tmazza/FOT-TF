@@ -1,23 +1,15 @@
-function minCut(N, source, sink) {
-  rows = 900 + 2;
-  cols = 900 + 2;
+function minCut(original, source, sink) {
 
-  console.log('rows: ', rows, 'cols:', cols);
+  rows = original.length;
 
-  let data = N._m;
-  // preenche todas a matrix com zero... 
-  // TODO: não fazer... tratar como lista encadeada 
-  original = [];
-  graph = [];
-  for(let i = 0; i < rows; i++) {
-    original[i] = [];
-    graph[i] = [];
-    for(let j = 0; j < cols; j++) {
-      original[i][j] = data[i] == undefined || data[i][j] == undefined ? 0 : data[i][j];
-      graph[i][j] = data[i] == undefined || data[i][j] == undefined ? 0 : data[i][j];
+  // cópia do original, mantém informações do fluxo consumido
+  let Graph = new Matrix2D();
+  for(let i in original) { 
+    for(let j in original[i]) {
+      Graph.addPixel(i, j, original[i][j]);
     }
   }
-
+  graph = Graph._m;
   let max_flow = 0;
   
   // usado pela busca em largura mantem cada 
@@ -59,8 +51,8 @@ function minCut(N, source, sink) {
   // aresta que inicialmente tinham peso, mas 
   // agora tem peso zero
   let cut = [];
-  for(let i = 0; i < rows; i++) {
-    for(let j = 0; j < cols; j++) {
+  for(let i in original) {
+    for(let j in original[i]) {
       if (graph[i][j] == 0 && original[i][j] > 0) {
         // console.log(i + " - " + j);
         cut.push([i, j]);
@@ -69,14 +61,14 @@ function minCut(N, source, sink) {
   }
 
   let sourceNodes = [];
-  for(let i = 0; i < rows; i++) {
+  for(let i in original) {
     if (graph[source][i] > 0) {
       sourceNodes.push(i);
     }
   }
 
   let sinkNodes = [];
-  for(let i = 0; i < rows; i++) {
+  for(let i in original) {
     if (graph[i][sink] > 0) {
       sinkNodes.push(i);
     }
@@ -110,7 +102,7 @@ function minCut(N, source, sink) {
       // tenha sido marcado, a fila.
       // console.log('graph', graph);
 
-      for(let j = 0; j < cols; j++) {
+      for(let j in graph[u]) {
         let arestas = graph[u];
         // console.log('arestas', arestas);
         // não visitado e há conexão

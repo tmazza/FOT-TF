@@ -1,7 +1,7 @@
 // configuração
 var lambda = 50;
 
-let imageSrc = './teste2.png';
+let imageSrc = './teste_5.png';
 // let imageSrc = './darth-vader.jpg';
 var Ctrl = (function(imageSrc) {
 
@@ -46,15 +46,21 @@ var Ctrl = (function(imageSrc) {
     toggleMarcarBackground: toggleMarcarBackground,
     getHistogramas: getHistogramas,
     drawResult: drawResult,
+    applyCut: applyCut,
   }
 
   // toggle seleção de pontos
   function clickEvent() {
     ativaMarcaRegiao = !ativaMarcaRegiao;
     if(!ativaMarcaRegiao) {
-      cutImage(getImage(), MB, MF);
+      applyCut();
       updateHist(MB, MF);
     }
+  }
+
+  function applyCut() {
+    image = getImage();
+    cutImage(image, MB, MF);
   }
 
   // Desenha retângulo e adiciona pontos
@@ -202,7 +208,6 @@ var Ctrl = (function(imageSrc) {
         image[i][j] = canvasShadow.getColor(i, j);        
       } 
     }
-    console.log('image', image);
     return [width, height, image];
   }
 
@@ -212,6 +217,7 @@ var Ctrl = (function(imageSrc) {
 var $lambdaCtrl = document.getElementById('lambda');
 $lambdaCtrl.addEventListener('change', function() {
   lambda = parseInt($lambdaCtrl.value);
+  console.log('lambda', lambda);
 })
 
 window.addEventListener("load", function() {
@@ -221,6 +227,10 @@ window.addEventListener("load", function() {
 document.addEventListener('keyup', function(e) {
   Ctrl.toggleMarcarBackground(e);
   Ctrl.updateMessage();
+});
+
+document.getElementById('cut').addEventListener('click', function() {
+  Ctrl.applyCut();
 });
 
 /* image: matrix 2D representando cada pixel da imagem
@@ -335,7 +345,7 @@ function cutImage(image, background, foreground) {
     }
   }
 
-  [sourceNodes, sinkNodes, cuts] = minCut(N, S, T);
+  [sourceNodes, sinkNodes, cuts] = minCut(N._m, S, T);
   Ctrl.drawResult(sourceNodes, sinkNodes, cuts);
 
   let after = (new Date()).getTime();
