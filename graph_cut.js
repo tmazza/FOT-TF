@@ -5,6 +5,8 @@ function minCut(N, source, sink) {
   console.log('rows: ', rows, 'cols:', cols);
 
   let data = N._m;
+  // preenche todas a matrix com zero... 
+  // TODO: não fazer... tratar como lista encadeada 
   original = [];
   graph = [];
   for(let i = 0; i < rows; i++) {
