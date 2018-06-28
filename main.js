@@ -1,41 +1,64 @@
 // configuração
-var width = 30;
-var height = 30;
 var lambda = 50;
 
 let imageSrc = './teste2.png';
-
+// let imageSrc = './darth-vader.jpg';
 var Ctrl = (function(imageSrc) {
 
   // Matrix com background
   var MB = new Matrix2D(); 
   // Matrix com foreground
   var MF = new Matrix2D(); 
-
-  // interface
-  var canvasMain = new Canvas('mainCanvas', width, height);
-  var canvasShadow = new Canvas('shadowCanvas', width, height);
-  var canvasResult = new Canvas('resultCanvas', width, height);
-
-  var $message = document.getElementById('message');
-
+  
   // controle interface
+  var $message = document.getElementById('message');
   var ativaMarcaRegiao = 0;
   var marcarBackground = 1;
   var marcarForeground = 0;
 
-  // carrega imagem no canvas
+  var canvasMain;
+  var canvasShadow;
+  var canvasResult;
+  var width;
+  var height;
+
+  // inicializa canvas
   var imageObj = new Image();
   imageObj.src = imageSrc;
   imageObj.onload = function() {
+    width = this.width;
+    height = this.height;
+
+    canvasMain = new Canvas('mainCanvas', width, height);
+    canvasShadow = new Canvas('shadowCanvas', width, height);
+    canvasResult = new Canvas('resultCanvas', width, height);
     canvasMain.context.drawImage(imageObj, 0, 0);
     canvasShadow.context.drawImage(imageObj, 0, 0);
     canvasResult.context.drawImage(imageObj, 0, 0);
+
+    canvasMain.node.addEventListener('click', clickEvent);
+    canvasMain.node.addEventListener('mousemove', hoverEvent, false);
+
   };
 
-  // events
-  canvasMain.node.addEventListener('mousemove', function(evt) {
-    // Desenha retângulo e adiciona pontos
+  return {
+    updateMessage: updateMessage,
+    toggleMarcarBackground: toggleMarcarBackground,
+    getHistogramas: getHistogramas,
+    drawResult: drawResult,
+  }
+
+  // toggle seleção de pontos
+  function clickEvent() {
+    ativaMarcaRegiao = !ativaMarcaRegiao;
+    if(!ativaMarcaRegiao) {
+      cutImage(getImage(), MB, MF);
+      updateHist(MB, MF);
+    }
+  }
+
+  // Desenha retângulo e adiciona pontos
+  function hoverEvent(evt) {
     var mousePos = canvasMain.getMousePos(evt);
     var x = parseInt(mousePos.x);
     var y = parseInt(mousePos.y);
@@ -52,28 +75,7 @@ var Ctrl = (function(imageSrc) {
       }
 
     }
-  }, false);
-
-  canvasMain.node.addEventListener('click', function() {
-    ativaMarcaRegiao = !ativaMarcaRegiao;
-    if(!ativaMarcaRegiao) {
-      cutImage(getImage(), MB, MF);
-      updateHist(MB, MF);
-    }
-  });
-
-  return {
-    updateMessage: updateMessage,
-    imageObj: imageObj,
-    canvasShadow: canvasShadow,
-    canvasResult: canvasResult,
-    toggleMarcarBackground: toggleMarcarBackground,
-    updateHist: updateHist,
-    getHistogramas: getHistogramas,
-    drawResult: drawResult,
   }
-
-  /// 
 
   function updateMessage() {
     if(marcarForeground) {
@@ -190,7 +192,6 @@ var Ctrl = (function(imageSrc) {
     //   }
     //   // canvasResult.drawPixel(ut[i][0],cut[i][1]);
     // }
-
   }
 
   function getImage() {
@@ -202,7 +203,7 @@ var Ctrl = (function(imageSrc) {
       } 
     }
     console.log('image', image);
-    return image;
+    return [width, height, image];
   }
 
 })(imageSrc);
@@ -228,6 +229,7 @@ document.addEventListener('keyup', function(e) {
  * foreground: matrix (M) identificando se pixel 
  * foi selecionado ou não como foreground */
 function cutImage(image, background, foreground) {
+  [width, height, pixels] = image;
   // marcar tempo
   let before = (new Date()).getTime();
 
@@ -239,16 +241,14 @@ function cutImage(image, background, foreground) {
       
   // R("obj") - penalties para obj
   function RFore(v) {
-    let a = 1 - Math.exp( -1 * (histFore[v] / somaFore) );
-    // TODO: remover isNan inicializar histrograma
-    return isNaN(a) ? 0.1 : a;
+    return a = 1 - Math.exp( -1 * (histFore[v] / somaFore) );
+    // return isNaN(a) ? 0.1 : a; // TODO: remover isNan: inicializar histrograma
   }
 
   // R("bkg") - penalties para "bkg"
   function RBack(v) {
-    let a = 1 - Math.exp( -1 * (histBack[v] / somaBack) );
-    // TODO: remover isNan inicializar histrograma
-    return isNaN(a) ? 0.1 : a;
+    return a = 1 - Math.exp( -1 * (histBack[v] / somaBack) );
+    // return isNaN(a) ? 0.1 : a; // TODO: remover isNan: inicializar histrograma
   }
   // Bpq - boundary penalty
   function B(vp, vq) {
@@ -272,12 +272,12 @@ function cutImage(image, background, foreground) {
       let from = i * width + j;
 
       // cor/intensidade do pixel
-      let pValue = image[i][j]; 
+      let pValue = pixels[i][j]; 
 
       /* Pares {p, q} 8-neighborhood */
       // Conexão abaixo
       if(i < width-1) {
-        var qValue = image[i+1][j];
+        var qValue = pixels[i+1][j];
         var value = B(pValue, qValue);
         let to = (i+1)*width + j;
         N.addPixel(from, to, value);
@@ -285,7 +285,7 @@ function cutImage(image, background, foreground) {
       }
       // Conexão a direita
       if(j < height-1) { 
-        var qValue = image[i][j+1];
+        var qValue = pixels[i][j+1];
         var value = B(pValue, qValue);
         let to = i*width + j+1;
         N.addPixel(from, to, value);
@@ -293,7 +293,7 @@ function cutImage(image, background, foreground) {
       }
       // Conexão diagonal direita-baixo
       if(i < width-1 && j < height-1) {
-        var qValue = image[i+1][j+1];
+        var qValue = pixels[i+1][j+1];
         var value = B(pValue, qValue);
         let to = (i+1)*width + j+1;
         N.addPixel(from, to, value);
@@ -301,7 +301,7 @@ function cutImage(image, background, foreground) {
       }
       // Conexão diagonal direita-superior
       if(i > 0 && j < height-1) {
-        var qValue = image[i-1][j+1];
+        var qValue = pixels[i-1][j+1];
         var value = B(pValue, qValue);
         let to = (i-1)*width + j+1;
         N.addPixel(from, to, value);
@@ -320,7 +320,7 @@ function cutImage(image, background, foreground) {
         pesoS = 0;
         pesoT = K;
       } else {
-        var pixelValue = image[i][j];
+        var pixelValue = pixels[i][j];
         pesoS = lambda * RBack(pixelValue);
         pesoT = lambda * RFore(pixelValue);
       }

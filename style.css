@@ -13,6 +13,7 @@ body {
   /*margin-top: -15px;*/
 }
 #shadowCanvas {
+  display: none;
   z-index: -1;
 }
 #message {
