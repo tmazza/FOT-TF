@@ -1,8 +1,8 @@
 // configuração
 var lambda = 50;
 
-let imageSrc = './teste_5.png';
-// let imageSrc = './darth-vader.jpg';
+let imageSrc = '../images/teste_5.png';
+// let imageSrc = '../images/darth-vader.jpg';
 var Ctrl = (function(imageSrc) {
 
   // Matrix com background
