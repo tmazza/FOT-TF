@@ -1,2 +1,2 @@
 all:
-	g++ -Iinclude -g -std=c++11 main.cpp -o main -lGL -lglfw
+	g++ -Iinclude -g -O2 -std=c++11 main.cpp -o main -lGL -lglfw

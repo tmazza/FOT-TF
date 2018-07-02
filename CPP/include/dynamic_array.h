@@ -157,6 +157,8 @@ HO_EXPORT size_t HO_API _array_push(void** array_, void* data)
 	size_t length = base->length;
 	size_t size_element = base->size_element;
 
+	dynamic_array temp_a = *(dynamic_array*)base;
+
 	if (length == capacity)
 	{
 		capacity *= 2;
@@ -166,9 +168,14 @@ HO_EXPORT size_t HO_API _array_push(void** array_, void* data)
 		base = (dynamic_array*)new_mem;
 		*array_ = (char*)new_mem + sizeof(dynamic_array);
 	}
+	dynamic_array temp_b = *(dynamic_array*)((char*)*array_ - sizeof(dynamic_array));
+	assert(temp_a.length == temp_b.length);
 
 	void* dst = (char*)*array_ + length * size_element;
 	base->length++;
+	if(array_get_length(array_) > 5000) {
+		int x =0;
+	}
 	memcpy(dst, data, size_element);
 	return base->length - 1;
 }
@@ -243,7 +250,11 @@ HO_EXPORT size_t HO_API array_get_capacity(void* array_)
 
 HO_EXPORT size_t HO_API array_get_length(void* array_)
 {
-	return ((dynamic_array*)((char*)array_ - sizeof(dynamic_array)))->length;
+	size_t l = ((dynamic_array*)((char*)array_ - sizeof(dynamic_array)))->length;
+	if(l > 5000) {
+		int x = 0;
+	}
+	return l;
 }
 
 HO_EXPORT size_t HO_API array_get_element_size(void* array_)

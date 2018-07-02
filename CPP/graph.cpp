@@ -1,10 +1,10 @@
-#include <math.h>
+ #include <math.h>
 #include <string.h>
 #define DYNAMIC_ARRAY_IMPLEMENT
 #include <dynamic_array.h>
 #define E_32 2.71828182846f
 
-void min_cut(Graph* graph, int width, int height);
+Graph* min_cut(Graph* graph, int width, int height);
 void print_graph(Graph* graph, int width, int height);
 
 float B(int vp, int vq) {
@@ -224,14 +224,15 @@ bool has_path(Graph* graph, int width, int height, ivec2* path) {
 	return false;
 }
 
-void min_cut(Graph* graph, int width, int height) {
+Graph* min_cut(Graph* graph, int width, int height) {
 	Graph* copy = (Graph*)calloc(1, width * height * sizeof(Graph));
 	memcpy(copy, graph, width * height * sizeof(Graph));
 
-	ivec2* path = array_create(ivec2, 16);
+	ivec2* path = array_create(ivec2, 1024);
 	while (has_path(copy, width, height, path)) {
 		float path_flow = 99999.0f;
-		for (int i = 0; i < array_get_length(path); ++i) {
+		size_t len = array_get_length(path);
+		for (int i = 0; i < len; ++i) {
 			if (path[i].connection < path_flow) {
 				path_flow = path[i].connection;
 			}
@@ -270,8 +271,10 @@ void min_cut(Graph* graph, int width, int height) {
 			}
 		}
 		array_clear(path);
-		print_graph(copy, width, height);
+		//print_graph(copy, width, height);
 	}
+	array_release(path);
+	return copy; 
 }
 
 void print_graph(Graph* graph, int width, int height) {

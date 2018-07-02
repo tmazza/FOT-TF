@@ -116,7 +116,24 @@ static void cut_image() {
 		}
 	}
 	print_graph(graph, w, h);
-	min_cut(graph, w, h);
+	Graph* cut = min_cut(graph, w, h);
+	for(int y = 0; y < texture.height; ++y) {
+		for(int x = 0; x < texture.width; ++x) {
+			int index = (y * 4) * texture.width + (x * 4);
+			if(cut[y * texture.width + x].sink > 0.0f) {
+				texture.data[index + 0] = 255;
+				texture.data[index + 1] = 0;
+				texture.data[index + 2] = 0;
+				texture.data[index + 3] = 255;
+			} else {
+				texture.data[index + 0] = texture.original[index + 0];
+				texture.data[index + 1] = texture.original[index + 1];
+				texture.data[index + 2] = texture.original[index + 2];
+				texture.data[index + 3] = 255;
+			}
+		}
+	}
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture.width, texture.height, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
 }
 
 static bool lmouse_button_down = false;
@@ -235,7 +252,7 @@ int main(void)
 	GLuint shader = shader_load(quad_vshader, quad_fshader, sizeof(quad_vshader) - 1, sizeof(quad_fshader) - 1);
 
 	int w, h, c;
-	u8* image_data = stbi_load("../images/teste.png", &w, &h, &c, 0);
+	u8* image_data = stbi_load("../images/teste_5.png", &w, &h, &c, 0);
 
 	texture.width = w;
 	texture.height = h;
