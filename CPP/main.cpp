@@ -1,5 +1,7 @@
 #include "common.h"
+#include <vector>
 #include <GLFW/glfw3.h>
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -111,6 +113,7 @@ static void cut_image() {
 			}
 		}
 	}
+	min_cut(graph, w, h);
 }
 
 static bool lmouse_button_down = false;
@@ -229,7 +232,7 @@ int main(void)
 	GLuint shader = shader_load(quad_vshader, quad_fshader, sizeof(quad_vshader) - 1, sizeof(quad_fshader) - 1);
 
 	int w, h, c;
-	u8* image_data = stbi_load("../images/teste_5.png", &w, &h, &c, 0);
+	u8* image_data = stbi_load("../images/teste.png", &w, &h, &c, 0);
 
 	texture.width = w;
 	texture.height = h;
