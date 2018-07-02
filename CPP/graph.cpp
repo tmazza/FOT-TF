@@ -5,6 +5,7 @@
 #define E_32 2.71828182846f
 
 void min_cut(Graph* graph, int width, int height);
+void print_graph(Graph* graph, int width, int height);
 
 float B(int vp, int vq) {
     return powf(E_32, -1.0f * fabs(vp - vq) / 255.0f);
@@ -64,8 +65,10 @@ struct ivec2 {
 };
 
 bool find_path(Graph* graph, int width, int height, int i, int j, ivec2* path) {
+	graph[i * width + j].visited = true;
 	// top
 	if (i < height - 1 && graph[(i + 1) * width + j].visited == false && graph[i * width + j].t > 0.0f) {
+
 		ivec2 v = ivec2(j, i, graph[i * width + j].t, CONN_T);
 		array_push(path, &v);
 		if (graph[(i + 1) * width + j].sink > 0.0f) {
@@ -203,7 +206,14 @@ bool has_path(Graph* graph, int width, int height, ivec2* path) {
 			if (graph[i * width + j].source <= 0.0f) {
 				continue;
 			}
-			
+
+			if(graph[i * width + j].sink > 0.0f) {
+				graph[i * width + j].visited = true;
+				ivec2 v = ivec2(j, i, graph[i * width + j].sink, CONN_SINK);
+				array_push(path, &v);
+				return true;
+			}
+
 			if (find_path(graph, width, height, i, j, path)) {
 				return true;
 			}
@@ -230,35 +240,54 @@ void min_cut(Graph* graph, int width, int height) {
 		for (int i = 0; i < array_get_length(path); ++i) {
 			switch (path[i].to) {
 			case CONN_SINK:
-				graph[path[i].y * width + path[i].x].sink -= path_flow;
+				copy[path[i].y * width + path[i].x].sink -= path_flow;
 				break;
 			case CONN_T:
-				graph[path[i].y * width + path[i].x].t -= path_flow;
+				copy[path[i].y * width + path[i].x].t -= path_flow;
 				break;
 			case CONN_B:
-				graph[path[i].y * width + path[i].x].b -= path_flow;
+				copy[path[i].y * width + path[i].x].b -= path_flow;
 				break;
 			case CONN_L:
-				graph[path[i].y * width + path[i].x].l -= path_flow;
+				copy[path[i].y * width + path[i].x].l -= path_flow;
 				break;
 			case CONN_R:
-				graph[path[i].y * width + path[i].x].r -= path_flow;
+				copy[path[i].y * width + path[i].x].r -= path_flow;
 				break;
 			case CONN_TL:
-				graph[path[i].y * width + path[i].x].tl -= path_flow;
+				copy[path[i].y * width + path[i].x].tl -= path_flow;
 				break;
 			case CONN_TR:
-				graph[path[i].y * width + path[i].x].tr -= path_flow;
+				copy[path[i].y * width + path[i].x].tr -= path_flow;
 				break;
 			case CONN_BL:
-				graph[path[i].y * width + path[i].x].bl -= path_flow;
+				copy[path[i].y * width + path[i].x].bl -= path_flow;
 				break;
 			case CONN_BR:
-				graph[path[i].y * width + path[i].x].br -= path_flow;
+				copy[path[i].y * width + path[i].x].br -= path_flow;
 				break;
 			default: assert("error");
 			}
 		}
 		array_clear(path);
+		print_graph(copy, width, height);
+	}
+}
+
+void print_graph(Graph* graph, int width, int height) {
+	printf("%d, %d\n", width, height);
+	for(int y = 0; y < height; ++y) {
+		for(int x = 0; x < width; ++x) {
+			printf("%5.2f,%5.2f,%5.2f | ", graph[y * width + x].tl, graph[y * width + x].t, graph[y * width + x].tr);
+		}
+		printf("\n");
+		for(int x = 0; x < width; ++x) {
+			printf("%5.2f,%5.2f,%5.2f | ", graph[y * width + x].l, graph[y * width + x].sink, graph[y * width + x].r);
+		}
+		printf("\n");
+		for(int x = 0; x < width; ++x) {
+			printf("%5.2f,%5.2f,%5.2f | ", graph[y * width + x].bl, graph[y * width + x].b, graph[y * width + x].br);
+		}
+		printf("\n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 	}
 }

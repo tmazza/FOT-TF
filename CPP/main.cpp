@@ -115,6 +115,7 @@ static void cut_image() {
 			}
 		}
 	}
+	print_graph(graph, w, h);
 	min_cut(graph, w, h);
 }
 
@@ -133,8 +134,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				break;
 			case 'C':
 				cut_image();
-				print_histogram(hist_background);
-				print_histogram(hist_foreground);
+				//print_histogram(hist_background);
+				//print_histogram(hist_foreground);
 				break;
 		}
 	}
@@ -162,7 +163,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 				float diffx = fabs(x - mousex);
 				float diffy = fabs(y - mousey);
 
-				if(sqrtf(diffx * diffx + diffy * diffy) <= 0.02f){
+				if(sqrtf(diffx * diffx + diffy * diffy) <= 0.05f){
 					background[i * texture.width + j] = selection;
 					texture.data[index + 0] = r;
 					texture.data[index + 1] = 0;
