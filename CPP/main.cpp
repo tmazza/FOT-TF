@@ -1,7 +1,9 @@
 #include "common.h"
 #include <vector>
 #include <GLFW/glfw3.h>
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
