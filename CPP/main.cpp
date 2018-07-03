@@ -1,5 +1,4 @@
 #include "common.h"
-#include <vector>
 #include <GLFW/glfw3.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -32,7 +31,7 @@ enum Selection{
 };
 static Selection selection = SELECTION_BACKGROUND;
 
-static float lambda = 50.0f;
+static float lambda = 100.0f;
 static Selection* background;
 
 #include "graph.cpp"
@@ -115,12 +114,12 @@ static void cut_image() {
 			}
 		}
 	}
-	print_graph(graph, w, h);
+	//print_graph(graph, w, h);
 	Graph* cut = min_cut(graph, w, h);
 	for(int y = 0; y < texture.height; ++y) {
 		for(int x = 0; x < texture.width; ++x) {
 			int index = (y * 4) * texture.width + (x * 4);
-			if(cut[y * texture.width + x].sink > 0.0f) {
+			if(cut[y * texture.width + x].sink > 0.0f || background[y * texture.width + x] == SELECTION_FOREGROUND) {
 				texture.data[index + 0] = 255;
 				texture.data[index + 1] = 0;
 				texture.data[index + 2] = 0;
@@ -150,7 +149,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				selection = SELECTION_FOREGROUND;
 				break;
 			case 'C':
+				double start = get_time();
 				cut_image();
+				double end = get_time();
+				printf("Elapsed: %fms.\n", end-start);
 				//print_histogram(hist_background);
 				//print_histogram(hist_foreground);
 				break;
@@ -252,7 +254,9 @@ int main(void)
 	GLuint shader = shader_load(quad_vshader, quad_fshader, sizeof(quad_vshader) - 1, sizeof(quad_fshader) - 1);
 
 	int w, h, c;
-	u8* image_data = stbi_load("../images/teste_5.png", &w, &h, &c, 0);
+	const char* filename = "../images/teste_5.png";
+	//const char* filename = "../images/darth-vader.jpg";
+	u8* image_data = stbi_load(filename, &w, &h, &c, 0);
 
 	texture.width = w;
 	texture.height = h;
